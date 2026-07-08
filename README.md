@@ -6,7 +6,6 @@ All assets used in this project are either original creations by the author or s
 <br>
 <h2>あらゆる作品に触れた経験をシンプルに記録するツール</h2>
 タイトル：ふれたもの台帳<br>
-ジャンル：作品の公開メディアに限定されない履修記録メモ<br>
 推奨環境：Android　Chrome　Windows<br>
 進捗：アイデアを思いついた段階<br>
 <br>
