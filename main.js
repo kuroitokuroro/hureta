@@ -144,15 +144,6 @@ function openAddDialog() {
     return;
   }
 
-  const sameTitleCount = items.filter(item => item.title === title).length;
-
-  if (sameTitleCount > 0) {
-    const ok = confirm(`「${title}」はすでに ${sameTitleCount} 件あります。新しい記録として追加しますか？`);
-    if (!ok) {
-      return;
-    }
-  }
-
   dialogTitleInput.value = title;
   selectedDialogTags = [];
   renderDialogTags();
@@ -277,9 +268,16 @@ function getTodayString() {
 titleInput.addEventListener("input", renderItems);
 
 titleInput.addEventListener("keydown", event => {
-  if (event.key === "Enter") {
-    openAddDialog();
+  if (event.key !== "Enter") {
+    return;
   }
+
+  if (event.isComposing) {
+    return;
+  }
+
+  event.preventDefault();
+  openAddDialog();
 });
 
 settingsButton.addEventListener("click", () => {
