@@ -1,3 +1,4 @@
+
 const titleInput = document.getElementById("titleInput");
 const settingsButton = document.getElementById("settingsButton");
 const backButton = document.getElementById("backButton");
