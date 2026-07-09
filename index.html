@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ふれたもの台帳</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <button id="settingsButton" class="icon-button" type="button">設定</button>
+      <input id="titleInput" class="title-input" type="text" placeholder="作品名を検索・追加">
+    </header>
+
+    <main id="mainView" class="view">
+      <section id="tagArea" class="tag-area"></section>
+      <section id="itemList" class="item-list"></section>
+    </main>
+
+    <main id="settingsView" class="view hidden">
+      <div class="settings-header">
+        <button id="backButton" class="icon-button" type="button">戻る</button>
+        <h1>設定</h1>
+      </div>
+
+      <section class="settings-section">
+        <label>
+          <input id="showDateToggle" type="checkbox" checked>
+          一覧に作成日を表示する
+        </label>
+      </section>
+
+      <section class="settings-section">
+        <h2>タグ管理</h2>
+        <div id="tagSettingsList"></div>
+
+        <div class="tag-add-row">
+          <input id="newTagInput" type="text" placeholder="新しいタグ名">
+          <button id="addTagButton" type="button">追加</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="addDialog" class="add-dialog">
+    <form method="dialog">
+      <h2>作品を追加</h2>
+
+      <label class="field">
+        タイトル
+        <input id="dialogTitleInput" type="text">
+      </label>
+
+      <div>
+        <p class="field-label">タグ</p>
+        <div id="dialogTagArea" class="tag-area"></div>
+      </div>
+
+      <div class="dialog-actions">
+        <button value="cancel" type="submit">キャンセル</button>
+        <button id="saveItemButton" value="save" type="button">投稿</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
