@@ -25,7 +25,7 @@ body {
 button {
   border: 1px solid #c7d4d8;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 999px;
   padding: 8px 10px;
   font-size: 14px;
 }
@@ -51,22 +51,47 @@ button {
 .tag-area {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 10px;
+  gap: 6px 6px;
   margin-bottom: 14px;
 }
 
 .tag-button {
-  border: none;
-  background: transparent;
-  padding: 2px 4px;
-  color: #40545a;
+  border: 3px  solid #beead4;
+  background: #ffffff;
+  padding: 2px 6px;
+  color: #000000;
   font-size: 13px;
 }
 
 .tag-button.active {
-  color: #111;
+  border: 3px  solid #289d64;
+  background: #289d64;
+  color: #ffffff;
   font-weight: 700;
-  text-decoration: underline;
+}
+
+.tag-setting-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  
+}
+
+.danger-button {
+  border-color: #d56b6b;
+  color: #ffffff;
+background-color: #b32020;
+}
+
+.cancel-button {
+  border-color: #b6b6b6;
+  color: #ffffff;
+background-color: #7f7f7f;
+}
+
+.tag-edit-button {
+  width: 100%;
+  text-align: left;
 }
 
 .item-list {
@@ -124,18 +149,41 @@ button {
 }
 
 .tag-setting-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  margin-bottom: 8px;
+  margin: 0 8px 8px 0;
+  vertical-align: top;
+}
+
+.tag-edit-button {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tag-edit-input {
+  width: 160px;
+  min-width: 0;
+  border: 1px solid #c7d4d8;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .tag-add-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+.tag-add-row input {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.tag-add-row button {
+  flex: 0 0 auto;
 }
 
 .tag-add-row input,

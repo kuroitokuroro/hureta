@@ -1,6 +1,5 @@
 const titleInput = document.getElementById("titleInput");
 const settingsButton = document.getElementById("settingsButton");
-const backButton = document.getElementById("backButton");
 const mainView = document.getElementById("mainView");
 const settingsView = document.getElementById("settingsView");
 
@@ -37,6 +36,9 @@ let selectedDialogTags = [];
 let settings = {
   showCreatedDate: true
 };
+let tagDeleteMode = false;
+let editingTag = "";
+let selectedDeleteTags = [];
 
 function render() {
   renderTags();
@@ -46,6 +48,22 @@ function render() {
 
 function renderTags() {
   tagArea.innerHTML = "";
+
+  const allButton = document.createElement("button");
+  allButton.type = "button";
+  allButton.className = "tag-button";
+  allButton.textContent = "すべて";
+
+  if (activeTag === "") {
+    allButton.classList.add("active");
+  }
+
+  allButton.addEventListener("click", () => {
+    activeTag = "";
+    render();
+  });
+
+  tagArea.appendChild(allButton);
 
   tags.forEach(tag => {
     const button = document.createElement("button");
@@ -117,24 +135,127 @@ function renderSettings() {
     const row = document.createElement("div");
     row.className = "tag-setting-row";
 
-    const name = document.createElement("span");
-    name.textContent = tag;
+    if (editingTag === tag) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = tag;
+      input.className = "tag-edit-input";
 
-    const renameButton = document.createElement("button");
-    renameButton.type = "button";
-    renameButton.textContent = "名前変更";
-    renameButton.addEventListener("click", () => renameTag(tag));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          saveRenamedTag(tag, input.value);
+        }
+      });
 
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.textContent = "削除";
-    deleteButton.addEventListener("click", () => deleteTag(tag));
+      input.addEventListener("blur", () => {
+        saveRenamedTag(tag, input.value);
+      });
 
-    row.appendChild(name);
-    row.appendChild(renameButton);
-    row.appendChild(deleteButton);
+      row.appendChild(input);
+
+      setTimeout(() => input.focus(), 0);
+    } else {
+      const tagButton = document.createElement("button");
+      tagButton.type = "button";
+      tagButton.className = "tag-edit-button";
+
+      if (tagDeleteMode) {
+        const isSelected = selectedDeleteTags.includes(tag);
+        tagButton.textContent = `${isSelected ? "☑" : "□"} ${tag}`;
+        tagButton.addEventListener("click", () => toggleDeleteTag(tag));
+      } else {
+        tagButton.textContent = tag;
+        tagButton.addEventListener("click", () => {
+          editingTag = tag;
+          render();
+        });
+      }
+
+      row.appendChild(tagButton);
+    }
+
     tagSettingsList.appendChild(row);
   });
+
+  const actionRow = document.createElement("div");
+  actionRow.className = "tag-setting-actions";
+
+  const deleteModeButton = document.createElement("button");
+  deleteModeButton.type = "button";
+  deleteModeButton.className = "danger-button";
+
+  if (tagDeleteMode) {
+    deleteModeButton.textContent = "選択したタグを削除";
+    deleteModeButton.addEventListener("click", deleteSelectedTags);
+
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "cancel-button";
+    cancelButton.textContent = "キャンセル";
+    cancelButton.addEventListener("click", () => {
+      tagDeleteMode = false;
+      selectedDeleteTags = [];
+      render();
+    });
+
+    actionRow.appendChild(deleteModeButton);
+    actionRow.appendChild(cancelButton);
+  } else {
+    deleteModeButton.textContent = "削除";
+    deleteModeButton.addEventListener("click", () => {
+      tagDeleteMode = true;
+      selectedDeleteTags = [];
+      editingTag = "";
+      render();
+    });
+
+    actionRow.appendChild(deleteModeButton);
+  }
+
+  tagSettingsList.appendChild(actionRow);
+}
+
+function toggleDeleteTag(targetTag) {
+  if (selectedDeleteTags.includes(targetTag)) {
+    selectedDeleteTags = selectedDeleteTags.filter(tag => tag !== targetTag);
+  } else {
+    selectedDeleteTags.push(targetTag);
+  }
+
+  render();
+}
+
+function deleteSelectedTags() {
+  if (selectedDeleteTags.length === 0) {
+    return;
+  }
+
+  const tagLines = selectedDeleteTags.map(tag => {
+    const usedCount = items.filter(item => item.tags.includes(tag)).length;
+    return `「${tag}」は ${usedCount} 件の作品についています`;
+  });
+
+  const ok = confirm(`タグを削除しますか？\n${tagLines.join("\n")}`);
+
+  if (!ok) {
+    return;
+  }
+
+  tags = tags.filter(tag => !selectedDeleteTags.includes(tag));
+
+  items = items.map(item => ({
+    ...item,
+    tags: item.tags.filter(tag => !selectedDeleteTags.includes(tag))
+  }));
+
+  if (selectedDeleteTags.includes(activeTag)) {
+    activeTag = "";
+  }
+
+  tagDeleteMode = false;
+  selectedDeleteTags = [];
+  render();
 }
 
 function openAddDialog() {
@@ -195,48 +316,33 @@ function saveItem() {
   render();
 }
 
-function renameTag(oldTag) {
-  const newTag = prompt("新しいタグ名", oldTag);
+function saveRenamedTag(oldTag, newTagText) {
+  const newTag = newTagText.trim();
 
-  if (!newTag || newTag.trim() === "") {
+  if (newTag === "" || newTag === oldTag) {
+    editingTag = "";
+    render();
     return;
   }
 
-  const trimmedTag = newTag.trim();
+  if (tags.includes(newTag)) {
+    editingTag = "";
+    render();
+    return;
+  }
 
-  tags = tags.map(tag => tag === oldTag ? trimmedTag : tag);
+  tags = tags.map(tag => tag === oldTag ? newTag : tag);
 
   items = items.map(item => ({
     ...item,
-    tags: item.tags.map(tag => tag === oldTag ? trimmedTag : tag)
+    tags: item.tags.map(tag => tag === oldTag ? newTag : tag)
   }));
 
   if (activeTag === oldTag) {
-    activeTag = trimmedTag;
+    activeTag = newTag;
   }
 
-  render();
-}
-
-function deleteTag(targetTag) {
-  const usedCount = items.filter(item => item.tags.includes(targetTag)).length;
-  const ok = confirm(`「${targetTag}」タグを削除します。このタグは ${usedCount} 件の作品についています。`);
-
-  if (!ok) {
-    return;
-  }
-
-  tags = tags.filter(tag => tag !== targetTag);
-
-  items = items.map(item => ({
-    ...item,
-    tags: item.tags.filter(tag => tag !== targetTag)
-  }));
-
-  if (activeTag === targetTag) {
-    activeTag = "";
-  }
-
+  editingTag = "";
   render();
 }
 
@@ -281,13 +387,17 @@ titleInput.addEventListener("keydown", event => {
 });
 
 settingsButton.addEventListener("click", () => {
-  mainView.classList.add("hidden");
-  settingsView.classList.remove("hidden");
-});
+  const settingsIsOpen = !settingsView.classList.contains("hidden");
 
-backButton.addEventListener("click", () => {
-  settingsView.classList.add("hidden");
-  mainView.classList.remove("hidden");
+  if (settingsIsOpen) {
+    settingsView.classList.add("hidden");
+    mainView.classList.remove("hidden");
+    settingsButton.textContent = "設定";
+  } else {
+    mainView.classList.add("hidden");
+    settingsView.classList.remove("hidden");
+    settingsButton.textContent = "戻る";
+  }
 });
 
 showDateToggle.addEventListener("change", () => {
