@@ -16,8 +16,34 @@ const showDateToggle = document.getElementById("showDateToggle");
 const tagSettingsList = document.getElementById("tagSettingsList");
 const newTagInput = document.getElementById("newTagInput");
 const addTagButton = document.getElementById("addTagButton");
+const newTagGroupSelect = document.getElementById("newTagGroupSelect");
 
-let tags = ["映画", "アニメ", "小説", "漫画", "まだ途中", "進捗あり", "END", "面白い", "捨て"];
+let tagGroups = [
+  {
+    id: "group1",
+    label: "1",
+    colorClass: "tag-group-1",
+    tags: ["漫画", "アニメ", "小説"]
+  },
+  {
+    id: "group2",
+    label: "2",
+    colorClass: "tag-group-2",
+    tags: ["まだ途中", "END", "進捗あり"]
+  },
+  {
+    id: "group3",
+    label: "3",
+    colorClass: "tag-group-3",
+    tags: ["面白い", "やめた"]
+  },
+  {
+    id: "group4",
+    label: "4",
+    colorClass: "tag-group-4",
+    tags: ["冒険", "感動", "ギャグ", "シュール"]
+  }
+];
 
 let items = [
   {
@@ -47,6 +73,23 @@ function render() {
   renderSettings();
 }
 
+function getAllTags() {
+  return tagGroups.flatMap(group => group.tags);
+}
+
+function getTagGroup(targetTag) {
+  return tagGroups.find(group => group.tags.includes(targetTag));
+}
+
+function getTagColorClass(targetTag) {
+  const group = getTagGroup(targetTag);
+  return group ? group.colorClass : "";
+}
+
+function tagExists(targetTag) {
+  return getAllTags().includes(targetTag);
+}
+
 function renderTags() {
   tagArea.innerHTML = "";
 
@@ -66,22 +109,24 @@ function renderTags() {
 
   tagArea.appendChild(allButton);
 
-  tags.forEach(tag => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "tag-button";
-    button.textContent = tag;
+  tagGroups.forEach(group => {
+    group.tags.forEach(tag => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `tag-button ${group.colorClass}`;
+      button.textContent = tag;
 
-    if (tag === activeTag) {
-      button.classList.add("active");
-    }
+      if (tag === activeTag) {
+        button.classList.add("active");
+      }
 
-    button.addEventListener("click", () => {
-      activeTag = activeTag === tag ? "" : tag;
-      render();
+      button.addEventListener("click", () => {
+        activeTag = activeTag === tag ? "" : tag;
+        render();
+      });
+
+      tagArea.appendChild(button);
     });
-
-    tagArea.appendChild(button);
   });
 }
 
@@ -120,7 +165,13 @@ function renderItems() {
     tagLine.className = "item-tags";
 
     const visibleTags = item.tags.filter(tag => tag !== activeTag);
-    tagLine.textContent = visibleTags.join("　");
+
+    visibleTags.forEach(tag => {
+      const tagSpan = document.createElement("span");
+      tagSpan.className = `item-tag-pill ${getTagColorClass(tag)}`;
+      tagSpan.textContent = tag;
+      tagLine.appendChild(tagSpan);
+    });
 
     row.appendChild(titleLine);
     row.appendChild(tagLine);
@@ -132,51 +183,62 @@ function renderSettings() {
   showDateToggle.checked = settings.showCreatedDate;
   tagSettingsList.innerHTML = "";
 
-  tags.forEach(tag => {
-    const row = document.createElement("div");
-    row.className = "tag-setting-row";
+  tagGroups.forEach(group => {
+    const groupRow = document.createElement("div");
+    groupRow.className = "tag-group-setting-row";
 
-    if (editingTag === tag) {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = tag;
-      input.className = "tag-edit-input";
+    const label = document.createElement("span");
+    label.className = `tag-group-label ${group.colorClass}`;
+    label.textContent = group.label;
+    groupRow.appendChild(label);
 
-      input.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          saveRenamedTag(tag, input.value);
-        }
-      });
+    group.tags.forEach(tag => {
+      const row = document.createElement("div");
+      row.className = "tag-setting-row";
 
-      input.addEventListener("blur", () => {
-        saveRenamedTag(tag, input.value);
-      });
+      if (editingTag === tag) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = tag;
+        input.className = "tag-edit-input";
 
-      row.appendChild(input);
-
-      setTimeout(() => input.focus(), 0);
-    } else {
-      const tagButton = document.createElement("button");
-      tagButton.type = "button";
-      tagButton.className = "tag-edit-button";
-
-      if (tagDeleteMode) {
-        const isSelected = selectedDeleteTags.includes(tag);
-        tagButton.textContent = `${isSelected ? "☑" : "□"} ${tag}`;
-        tagButton.addEventListener("click", () => toggleDeleteTag(tag));
-      } else {
-        tagButton.textContent = tag;
-        tagButton.addEventListener("click", () => {
-          editingTag = tag;
-          render();
+        input.addEventListener("keydown", event => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            saveRenamedTag(tag, input.value);
+          }
         });
+
+        input.addEventListener("blur", () => {
+          saveRenamedTag(tag, input.value);
+        });
+
+        row.appendChild(input);
+        setTimeout(() => input.focus(), 0);
+      } else {
+        const tagButton = document.createElement("button");
+        tagButton.type = "button";
+        tagButton.className = `tag-edit-button ${group.colorClass}`;
+
+        if (tagDeleteMode) {
+          const isSelected = selectedDeleteTags.includes(tag);
+          tagButton.textContent = `${isSelected ? "☑" : "□"} ${tag}`;
+          tagButton.addEventListener("click", () => toggleDeleteTag(tag));
+        } else {
+          tagButton.textContent = tag;
+          tagButton.addEventListener("click", () => {
+            editingTag = tag;
+            render();
+          });
+        }
+
+        row.appendChild(tagButton);
       }
 
-      row.appendChild(tagButton);
-    }
+      groupRow.appendChild(row);
+    });
 
-    tagSettingsList.appendChild(row);
+    tagSettingsList.appendChild(groupRow);
   });
 
   const actionRow = document.createElement("div");
@@ -243,7 +305,10 @@ function deleteSelectedTags() {
     return;
   }
 
-  tags = tags.filter(tag => !selectedDeleteTags.includes(tag));
+  tagGroups = tagGroups.map(group => ({
+    ...group,
+    tags: group.tags.filter(tag => !selectedDeleteTags.includes(tag))
+  }));
 
   items = items.map(item => ({
     ...item,
@@ -275,27 +340,29 @@ function openAddDialog() {
 function renderDialogTags() {
   dialogTagArea.innerHTML = "";
 
-  tags.forEach(tag => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "tag-button";
-    button.textContent = tag;
+  tagGroups.forEach(group => {
+    group.tags.forEach(tag => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `tag-button ${group.colorClass}`;
+      button.textContent = tag;
 
-    if (selectedDialogTags.includes(tag)) {
-      button.classList.add("active");
-    }
-
-    button.addEventListener("click", () => {
       if (selectedDialogTags.includes(tag)) {
-        selectedDialogTags = selectedDialogTags.filter(selectedTag => selectedTag !== tag);
-      } else {
-        selectedDialogTags.push(tag);
+        button.classList.add("active");
       }
 
-      renderDialogTags();
-    });
+      button.addEventListener("click", () => {
+        if (selectedDialogTags.includes(tag)) {
+          selectedDialogTags = selectedDialogTags.filter(selectedTag => selectedTag !== tag);
+        } else {
+          selectedDialogTags.push(tag);
+        }
 
-    dialogTagArea.appendChild(button);
+        renderDialogTags();
+      });
+
+      dialogTagArea.appendChild(button);
+    });
   });
 }
 
@@ -326,13 +393,16 @@ function saveRenamedTag(oldTag, newTagText) {
     return;
   }
 
-  if (tags.includes(newTag)) {
+  if (tagExists(newTag)) {
     editingTag = "";
     render();
     return;
   }
 
-  tags = tags.map(tag => tag === oldTag ? newTag : tag);
+  tagGroups = tagGroups.map(group => ({
+    ...group,
+    tags: group.tags.map(tag => tag === oldTag ? newTag : tag)
+  }));
 
   items = items.map(item => ({
     ...item,
@@ -349,12 +419,23 @@ function saveRenamedTag(oldTag, newTagText) {
 
 function addTag() {
   const newTag = newTagInput.value.trim();
+  const targetGroupId = newTagGroupSelect.value;
 
-  if (newTag === "" || tags.includes(newTag)) {
+  if (newTag === "" || tagExists(newTag)) {
     return;
   }
 
-  tags.push(newTag);
+  tagGroups = tagGroups.map(group => {
+    if (group.id !== targetGroupId) {
+      return group;
+    }
+
+    return {
+      ...group,
+      tags: [...group.tags, newTag]
+    };
+  });
+
   newTagInput.value = "";
   render();
 }

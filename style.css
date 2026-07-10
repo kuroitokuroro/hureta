@@ -23,15 +23,15 @@ body {
 
 .icon-button,
 button {
-  border: 1px solid #c7d4d8;
   background: #fff;
-  border-radius: 999px;
-  padding: 8px 10px;
+  border: 3px solid #beead4;
+  border-radius: 10px;
+  padding: 5px 10px;
   font-size: 14px;
 }
 
 .title-input {
-  width: 100%;
+  width: 80%;
   border: 1px solid #c7d4d8;
   border-radius: 8px;
   padding: 10px 12px;
@@ -56,16 +56,22 @@ button {
 }
 
 .tag-button {
-  border: 3px  solid #beead4;
   background: #ffffff;
-  padding: 2px 6px;
-  color: #000000;
-  font-size: 13px;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #b7b7b7;
+  border-left-color: #b7b7b7;
+  border-right-color: #797979;
+  border-bottom-color: #797979;
+  border-radius: 14px;
+  padding: 5px 14px;
+  color: #000;
+  font-size: 16px;
 }
 
 .tag-button.active {
-  border: 3px  solid #289d64;
-  background: #289d64;
+  border: 3px solid #b7b7b7;
+  background: #797979;
   color: #ffffff;
   font-weight: 700;
 }
@@ -74,19 +80,19 @@ button {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
-  
+
 }
 
 .danger-button {
   border-color: #d56b6b;
   color: #ffffff;
-background-color: #b32020;
+  background-color: #b32020;
 }
 
 .cancel-button {
   border-color: #b6b6b6;
   color: #ffffff;
-background-color: #7f7f7f;
+  background-color: #7f7f7f;
 }
 
 .tag-edit-button {
@@ -151,10 +157,11 @@ background-color: #7f7f7f;
 .tag-setting-row {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 3px;
   align-items: center;
-  margin: 0 8px 8px 0;
+  margin: 0 5px 5px 0;
   vertical-align: top;
+  border-radius: 10px;
 }
 
 .tag-edit-button {
@@ -174,6 +181,7 @@ background-color: #7f7f7f;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  width: 80%;
   margin-top: 12px;
 }
 
@@ -187,6 +195,7 @@ background-color: #7f7f7f;
 }
 
 .tag-add-row input,
+.tag-add-row select,
 .field input {
   width: 100%;
   border: 1px solid #c7d4d8;
@@ -215,4 +224,118 @@ background-color: #7f7f7f;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.tag-group-1 {
+  background: #ffffff;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #7acea6;
+  border-left-color: #7acea6;
+  border-right-color: #289d64;
+  border-bottom-color: #289d64;
+  border-radius: 14px;
+  padding: 5px 14px;
+  color: #000;
+}
+
+.tag-group-1.active {
+  border: 3px solid #7acea6;
+  background: #289d64;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+
+.tag-group-2 {
+  background: #ffffff;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #e4be9d;
+  border-left-color: #e4be9d;
+  border-right-color: #bd8b5f;
+  border-bottom-color: #bf7e45;
+  border-radius: 14px;
+  padding: 5px 14px;
+  color: #000;
+}
+
+.tag-group-2.active {
+  border: 3px solid #e4be9d;
+  background: #bf7e45;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tag-group-3 {
+  background: #ffffff;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #8ec5dd;
+  border-left-color: #8ec5dd;
+  border-right-color: #417a92;
+  border-bottom-color: #417a92;
+  border-radius: 14px;
+  padding: 5px 14px;
+  color: #000;
+}
+
+.tag-group-3.active {
+  border: 3px solid #8ec5dd;
+  background: #417a92;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tag-group-4 {
+  background: #ffffff;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #b79ad6;
+  border-left-color: #b79ad6;
+  border-right-color: #7748a7;
+  border-bottom-color: #7748a7;
+  border-radius: 14px;
+  padding: 5px 14px;
+  color: #000;
+}
+
+.tag-group-4.active {
+  border: 3px solid #b79ad6;
+  background: #7748a7;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tag-group-setting-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.tag-group-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+  padding-left: 1.5em;
+}
+
+.tag-group-label {
+  border: none;
+}
+
+.item-tag-pill {
+  display: inline-flex;
+  padding: 1px 7px;
+  color: #525252;
+  font-size: 13px;
 }
