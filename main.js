@@ -9,8 +9,10 @@ const itemList = document.getElementById("itemList");
 
 const addDialog = document.getElementById("addDialog");
 const dialogTitleInput = document.getElementById("dialogTitleInput");
+const openAddButton = document.getElementById("openAddButton");
 const dialogTagArea = document.getElementById("dialogTagArea");
 const saveItemButton = document.getElementById("saveItemButton");
+const deleteItemButton = document.getElementById("deleteItemButton");
 
 const showDateToggle = document.getElementById("showDateToggle");
 const tagSettingsList = document.getElementById("tagSettingsList");
@@ -60,12 +62,54 @@ let items = [
 
 let activeTag = "";
 let selectedDialogTags = [];
+let editingItemIndex = -1;
 let settings = {
   showCreatedDate: true
 };
 let tagDeleteMode = false;
 let editingTag = "";
 let selectedDeleteTags = [];
+
+const STORAGE_KEY = "furetamonoDaichoData";
+
+function saveData() {
+  const data = {
+    items,
+    tagGroups,
+    settings
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadData() {
+  const savedText = localStorage.getItem(STORAGE_KEY);
+
+  if (!savedText) {
+    return;
+  }
+
+  try {
+    const savedData = JSON.parse(savedText);
+
+    if (Array.isArray(savedData.items)) {
+      items = savedData.items;
+    }
+
+    if (Array.isArray(savedData.tagGroups)) {
+      tagGroups = savedData.tagGroups;
+    }
+
+    if (savedData.settings && typeof savedData.settings === "object") {
+      settings = {
+        ...settings,
+        ...savedData.settings
+      };
+    }
+  } catch (error) {
+    console.error("保存データの読み込みに失敗しました", error);
+  }
+}
 
 function render() {
   renderTags();
@@ -133,17 +177,20 @@ function renderTags() {
 function renderItems() {
   const keyword = titleInput.value.trim().toLowerCase();
 
-  const filteredItems = items.filter(item => {
-    const matchesKeyword = item.title.toLowerCase().includes(keyword);
-    const matchesTag = activeTag === "" || item.tags.includes(activeTag);
-    return matchesKeyword && matchesTag;
-  });
+  const filteredItems = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => {
+      const matchesKeyword = item.title.toLowerCase().includes(keyword);
+      const matchesTag = activeTag === "" || item.tags.includes(activeTag);
+      return matchesKeyword && matchesTag;
+    });
 
   itemList.innerHTML = "";
 
-  filteredItems.forEach(item => {
+  filteredItems.forEach(({ item, index }) => {
     const row = document.createElement("article");
     row.className = "item-row";
+    row.addEventListener("click", () => openEditDialog(index));
 
     const titleLine = document.createElement("div");
     titleLine.className = "item-title-line";
@@ -321,6 +368,7 @@ function deleteSelectedTags() {
 
   tagDeleteMode = false;
   selectedDeleteTags = [];
+  saveData();
   render();
 }
 
@@ -331,8 +379,27 @@ function openAddDialog() {
     return;
   }
 
+  editingItemIndex = -1;
   dialogTitleInput.value = title;
   selectedDialogTags = [];
+  saveItemButton.textContent = "投稿";
+  deleteItemButton.classList.add("hidden");
+  renderDialogTags();
+  addDialog.showModal();
+}
+
+function openEditDialog(itemIndex) {
+  const item = items[itemIndex];
+
+  if (!item) {
+    return;
+  }
+
+  editingItemIndex = itemIndex;
+  dialogTitleInput.value = item.title;
+  selectedDialogTags = [...item.tags];
+  saveItemButton.textContent = "保存";
+  deleteItemButton.classList.remove("hidden");
   renderDialogTags();
   addDialog.showModal();
 }
@@ -373,14 +440,44 @@ function saveItem() {
     return;
   }
 
-  items.unshift({
-    title,
-    createdAt: getTodayString(),
-    tags: [...selectedDialogTags]
-  });
+  if (editingItemIndex === -1) {
+    items.unshift({
+      title,
+      createdAt: getTodayString(),
+      tags: [...selectedDialogTags]
+    });
+  } else {
+    items[editingItemIndex] = {
+      ...items[editingItemIndex],
+      title,
+      tags: [...selectedDialogTags]
+    };
+  }
 
+  editingItemIndex = -1;
   titleInput.value = "";
   addDialog.close();
+  saveData();
+  render();
+}
+
+function deleteItem() {
+  if (editingItemIndex === -1) {
+    return;
+  }
+
+  const item = items[editingItemIndex];
+  const ok = confirm(`「${item.title}」を削除しますか？`);
+
+  if (!ok) {
+    return;
+  }
+
+  items.splice(editingItemIndex, 1);
+
+  editingItemIndex = -1;
+  addDialog.close();
+  saveData();
   render();
 }
 
@@ -414,6 +511,7 @@ function saveRenamedTag(oldTag, newTagText) {
   }
 
   editingTag = "";
+  saveData();
   render();
 }
 
@@ -437,6 +535,7 @@ function addTag() {
   });
 
   newTagInput.value = "";
+  saveData();
   render();
 }
 
@@ -468,6 +567,8 @@ titleInput.addEventListener("keydown", event => {
   openAddDialog();
 });
 
+openAddButton.addEventListener("click", openAddDialog);
+
 settingsButton.addEventListener("click", () => {
   const settingsIsOpen = !settingsView.classList.contains("hidden");
 
@@ -484,10 +585,13 @@ settingsButton.addEventListener("click", () => {
 
 showDateToggle.addEventListener("change", () => {
   settings.showCreatedDate = showDateToggle.checked;
+  saveData();
   render();
 });
 
 addTagButton.addEventListener("click", addTag);
 saveItemButton.addEventListener("click", saveItem);
+deleteItemButton.addEventListener("click", deleteItem);
 
+loadData();
 render();

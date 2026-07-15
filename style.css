@@ -16,7 +16,7 @@ body {
 
 .top-bar {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 8px;
   margin-bottom: 12px;
 }
